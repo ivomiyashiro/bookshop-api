@@ -1,11 +1,13 @@
-# 📖 Book Dev Shop
+# 📖 Dev Bookstore
 
  An innovative online bookstore that aims to provide book and coding lovers with a seamless and convenient shopping experience.
 
 ## 😁 Technologies
 
 ✅ Nest.js
+
 ✅ Prisma
+
 ✅ PostgreSQL
 
 ## 🛠 Installation
