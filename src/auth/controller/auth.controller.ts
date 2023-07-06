@@ -9,9 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from '../service/auth.service';
-import { SignupDto, LoginDto } from '../dto';
-import { AuthRequest } from '../interface';
+import { AuthService, AuthRequest, SignupDto, LoginDto } from '../';
 
 // Controller handles api routes
 @Controller('api/auth')
@@ -19,13 +17,28 @@ export class AuthController {
   constructor(private auth: AuthService) {} // Injecting AuthService
 
   @Post('signup') // dto is Data Transfer Object
-  signup(@Body() dto: SignupDto) {
-    return this.auth.signup(dto);
+  async signup(@Body() dto: SignupDto) {
+    const user = await this.auth.signup(dto);
+
+    return {
+      data: {
+        user,
+      },
+    };
   }
 
   @Post('login')
-  login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    return this.auth.login(dto, res);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.auth.login(dto, res);
+
+    return {
+      data: {
+        user,
+      },
+    };
   }
 
   @Get('provider/google')

@@ -36,11 +36,7 @@ export class AuthService {
 
       const { password, ...restOfUser } = user;
 
-      return {
-        data: {
-          user: restOfUser,
-        },
-      };
+      return { user: { ...restOfUser } };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -74,11 +70,7 @@ export class AuthService {
 
       const { password, ...restOfUser } = user;
 
-      return {
-        data: {
-          user: restOfUser,
-        },
-      };
+      return { user: { ...restOfUser } };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -121,8 +113,6 @@ export class AuthService {
 
       return token;
     } catch (error) {
-      console.log(error);
-
       return null;
     }
   }
