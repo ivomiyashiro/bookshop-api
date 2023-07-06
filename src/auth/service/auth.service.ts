@@ -7,13 +7,12 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
-import { hash, verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { LoginDto, SignupDto } from './dto';
-import { AuthRequest } from './interface';
+import { Prisma, Role } from '@prisma/client';
+import { hash, verify } from 'argon2';
+import { PrismaService } from '../../prisma/prisma.service';
+import { LoginDto, SignupDto, AuthRequest } from '../';
 
 @Injectable()
 export class AuthService {
