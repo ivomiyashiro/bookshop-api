@@ -9,7 +9,8 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService, AuthRequest, SignupDto, LoginDto } from '../';
+import { AuthRequest, SignupDto, LoginDto } from '../';
+import { AuthService } from '../service/auth.service';
 
 // Controller handles api routes
 @Controller('api/auth')
