@@ -3,6 +3,7 @@ import { Response } from 'express';
 import {
   ConflictException,
   Injectable,
+  Req,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, SignupDto } from './dto';
+import { AuthRequest } from './interface';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +53,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto, @Res({ passthrough: true }) response: Response) {
+  async login(dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const ERROR = 'Email or password incorrect.';
 
     try {
@@ -67,7 +69,7 @@ export class AuthService {
 
       const token = await this.signToken(user.id, user.email, user.role);
 
-      response.cookie('ACCESS_TOKEN', token, {
+      res.cookie('ACCESS_TOKEN', token, {
         maxAge: 12 * 60 * 60 * 1000, // 12h
       });
 
@@ -89,6 +91,22 @@ export class AuthService {
     }
   }
 
+  async googleAuth(@Req() req: AuthRequest, @Res() res: Response) {
+    const { id, email, role } = req.user;
+
+    const token = await this.signToken(id, email, role);
+
+    if (!token) {
+      return res.redirect(this.config.get('CLIENT_ORIGIN'));
+    }
+
+    res.cookie('ACCESS_TOKEN', token, {
+      maxAge: 12 * 60 * 60 * 1000, // 12h
+    });
+
+    return res.redirect(this.config.get('CLIENT_ORIGIN'));
+  }
+
   async signToken(userId: number, email: string, role: Role): Promise<string> {
     const payload = {
       sub: userId,
@@ -96,11 +114,17 @@ export class AuthService {
       role,
     };
 
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: '12h',
-      secret: this.config.get('JWT_SECRET'),
-    });
+    try {
+      const token = await this.jwt.signAsync(payload, {
+        expiresIn: '12h',
+        secret: this.config.get('JWT_SECRET'),
+      });
 
-    return token;
+      return token;
+    } catch (error) {
+      console.log(error);
+
+      return null;
+    }
   }
 }
