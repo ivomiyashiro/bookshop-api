@@ -11,6 +11,15 @@ describe('AuthController', () => {
   let authController: AuthController;
   let authService: AuthService;
 
+  const userMock = {
+    id: 1,
+    email: 'test@example.com',
+    name: 'Testing Name',
+    role: Role.CUSTOMER,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
@@ -27,17 +36,6 @@ describe('AuthController', () => {
 
   describe('signup', () => {
     it('should return a new user', async () => {
-      const userMock = {
-        user: {
-          id: 1,
-          email: 'test@example.com',
-          name: 'Testing Name',
-          role: Role.CUSTOMER,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      };
-
       const signupDto = {
         name: 'Testing Name',
         email: 'test@example.com',
@@ -46,9 +44,9 @@ describe('AuthController', () => {
 
       jest.spyOn(authService, 'signup').mockResolvedValue(userMock);
 
-      const result = await authController.signup(signupDto);
+      const user = await authController.signup(signupDto);
 
-      expect(result).toEqual({ data: { user: userMock } });
+      expect(user).toEqual({ data: { user: { ...userMock } } });
       expect(authService.signup).toHaveBeenCalledWith(signupDto);
     });
   });
@@ -60,24 +58,17 @@ describe('AuthController', () => {
         password: 'password',
       };
 
-      const userMock = {
-        user: {
-          id: 1,
-          email: 'test@example.com',
-          name: 'Testing Name',
-          role: Role.CUSTOMER,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      };
-
       const response: any = {};
 
       jest.spyOn(authService, 'login').mockResolvedValue(userMock);
 
-      const result = await authController.login(loginDto, response);
+      const user = await authController.login(loginDto, response);
 
-      expect(result).toEqual({ data: { user: userMock } });
+      expect(user).toEqual({
+        data: {
+          user: { ...userMock },
+        },
+      });
       expect(authService.login).toHaveBeenCalledWith(loginDto, response);
     });
   });
