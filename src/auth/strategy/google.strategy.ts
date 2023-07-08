@@ -3,6 +3,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { PrismaService } from '../../prisma/prisma.service';
+import { hash } from 'argon2';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -35,7 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
           data: {
             email: email,
             name: name,
-            password: '-',
+            password: await hash('-'),
           },
         });
 
