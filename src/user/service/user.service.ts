@@ -20,7 +20,7 @@ export class UserService {
     private authService: AuthService,
   ) {}
 
-  async updateMe(dto: UpdateMeDto, me: User, res: Response) {
+  async updateMe(dto: UpdateMeDto, me: Omit<User, 'password'>, res: Response) {
     try {
       const user = await this.prismaService.user.update({
         where: { id: me.id },
@@ -92,7 +92,7 @@ export class UserService {
 
       const totalCount = await this.prismaService.user.count();
 
-      return { users, totalCount };
+      return { users, count: users.length, totalCount };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientValidationError) {
         throw new BadRequestException([`Validation error`]);
