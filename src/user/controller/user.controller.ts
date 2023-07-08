@@ -13,14 +13,13 @@ import {
 } from '@nestjs/common';
 import { Role, User } from '@prisma/client';
 import { JwtGuard } from '../../auth/guard';
-import { AuthUser } from 'src/auth';
+import { AuthUser } from '../../auth';
 import { UserService } from '../service/user.service';
 import { UpdateMeDto, UpdateUserDto } from '../dto';
 import { Roles } from '../decorator';
 import { RolesGuard } from '../guard';
 import { IQuery } from '../interface';
-import { UserFilterPipe, UpdateMePipe } from '../pipe';
-import { UpdateUserPipe } from '../pipe/updateUser.pipe';
+import { UserFilterPipe, UpdateMePipe, UpdateUserPipe } from '../pipe';
 
 @Controller('api/')
 export class UserController {
@@ -36,7 +35,7 @@ export class UserController {
   @Put('storefront/users/me')
   async updateMe(
     @Body(UpdateMePipe) dto: UpdateMeDto,
-    @AuthUser() me: User,
+    @AuthUser() me: Omit<User, 'password'>,
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = await this.userService.updateMe(dto, me, res);
@@ -49,9 +48,9 @@ export class UserController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtGuard, RolesGuard)
   async getUsers(@Query(UserFilterPipe) query: IQuery) {
-    const { users, totalCount } = await this.userService.getUsers(query);
+    const { users, count, totalCount } = await this.userService.getUsers(query);
 
-    return { data: { users, count: users.length, totalCount } };
+    return { data: { users, count, totalCount } };
   }
 
   @Get('admin/users/:id')
