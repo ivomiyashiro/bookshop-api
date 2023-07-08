@@ -71,12 +71,10 @@ describe('AuthService', () => {
 
       // Test if signup return the correct user data
       expect(result).toEqual({
-        user: {
-          id: 1,
-          email: dto.email,
-          name: dto.name,
-          role: Role.CUSTOMER,
-        },
+        id: 1,
+        email: dto.email,
+        name: dto.name,
+        role: Role.CUSTOMER,
       });
     });
 
@@ -139,12 +137,10 @@ describe('AuthService', () => {
       });
 
       expect(result).toEqual({
-        user: {
-          id: 1,
-          email: dto.email,
-          name: 'Test User',
-          role: Role.CUSTOMER,
-        },
+        id: 1,
+        email: dto.email,
+        name: 'Test User',
+        role: Role.CUSTOMER,
       });
     });
 
