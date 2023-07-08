@@ -3,8 +3,6 @@ import { Response } from 'express';
 import {
   ConflictException,
   Injectable,
-  Req,
-  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -36,7 +34,7 @@ export class AuthService {
 
       const { password, ...restOfUser } = user;
 
-      return { user: { ...restOfUser } };
+      return { ...restOfUser };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -48,7 +46,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(dto: LoginDto, res: Response) {
     const ERROR = 'Email or password incorrect.';
 
     try {
@@ -70,7 +68,7 @@ export class AuthService {
 
       const { password, ...restOfUser } = user;
 
-      return { user: { ...restOfUser } };
+      return { ...restOfUser };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -82,7 +80,7 @@ export class AuthService {
     }
   }
 
-  async googleAuth(@Req() req: AuthRequest, @Res() res: Response) {
+  async googleAuth(req: AuthRequest, res: Response) {
     const { id, email, role } = req.user;
 
     const token = await this.signToken(id, email, role);
