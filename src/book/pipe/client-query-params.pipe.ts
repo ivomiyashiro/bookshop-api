@@ -69,6 +69,23 @@ export class ClientQueryParamsPipe implements PipeTransform {
           },
         };
       }
+
+      if (filtersObj.price) {
+        if (filtersObj.price.max && filtersObj.price.min) {
+          where.price = {
+            gte: filtersObj.price.min,
+            lte: filtersObj.price.max,
+          };
+        } else if (filtersObj.price.min) {
+          where.price = {
+            gte: filtersObj.price.min,
+          };
+        } else if (filtersObj.price.max) {
+          where.price = {
+            lte: filtersObj.price.max,
+          };
+        }
+      }
     }
 
     return {
