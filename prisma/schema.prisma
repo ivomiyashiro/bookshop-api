@@ -19,27 +19,32 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   orders    Order[]
-  cart      Cart?
 }
 
 model Book {
   id          Int         @id @default(autoincrement())
-  title       String
-  author      String
+  title       String      @unique
   description String
   price       Float
   image       String
   stock       Int
+  status      BookStatus  @default(VISIBLE)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  language    Language[]
+  authors     Author[]
+  languages   Language[]
   orderItems  OrderItem[]
-  cartItems   CartItem[]
 }
 
 model Language {
   id        Int    @id @default(autoincrement())
   name      String @unique
+  books     Book[]
+}
+
+model Author {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
   books     Book[]
 }
 
@@ -64,24 +69,6 @@ model OrderItem {
   orderId  Int
 }
 
-model Cart {
-  id        Int         @id @default(autoincrement())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  userId    Int         @unique
-  cartItems CartItem[]
-}
-
-model CartItem {
-  id       Int   @id @default(autoincrement())
-  quantity Int
-  book     Book  @relation(fields: [bookId], references: [id])
-  bookId   Int
-  cart     Cart  @relation(fields: [cartId], references: [id])
-  cartId   Int
-}
-
 enum Role {
   CUSTOMER
   ADMIN
@@ -90,4 +77,9 @@ enum Role {
 enum OrderStatus {
   PAID
   CANCELLED
+}
+
+enum BookStatus {
+  VISIBLE
+  HIDDEN
 }
