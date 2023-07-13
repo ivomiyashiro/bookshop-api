@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ItemsToPayDto } from '../dto';
-import { preferences } from '../config';
+import { preferences } from '../preferences';
 
 @Injectable()
 export class PaymentService {
