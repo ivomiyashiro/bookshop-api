@@ -3,7 +3,7 @@ import { PaymentService } from '../services/payment.service';
 import { ItemsToPayDto } from '../dto';
 import { ItemsDataValidationPipe } from '../pipe';
 
-@Controller('/api/payment')
+@Controller('/api/payments')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
@@ -11,9 +11,7 @@ export class PaymentController {
   async createPayment(@Body(ItemsDataValidationPipe) dto: ItemsToPayDto) {
     const payment_url = await this.paymentService.createPayment(dto);
 
-    return {
-      data: { payment_url },
-    };
+    return { data: { payment_url } };
   }
 
   @Post('/notifications')
