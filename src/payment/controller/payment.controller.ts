@@ -17,7 +17,7 @@ export class PaymentController {
   }
 
   @Post('/notifications')
-  async catchWebHook(@Body(ItemsDataValidationPipe) dto: any) {
+  async catchWebHook(@Body() dto: any) {
     console.log(dto);
     return { data: { msg: 'Recibido' } };
   }
