@@ -15,4 +15,10 @@ export class PaymentController {
       data: { payment_url },
     };
   }
+
+  @Post('/notifications')
+  async catchWebHook(@Body(ItemsDataValidationPipe) dto: any) {
+    console.log(dto);
+    return { data: { msg: 'Recibido' } };
+  }
 }
