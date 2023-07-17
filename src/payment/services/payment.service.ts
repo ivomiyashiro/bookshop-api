@@ -78,7 +78,7 @@ export class PaymentService {
         });
       });
 
-      const createOrder = this.prismaService.order.create({
+      const order = this.prismaService.order.create({
         data: {
           customer: {
             connect: {
@@ -103,10 +103,10 @@ export class PaymentService {
               },
             },
           },
-        },
+        } as any,
       });
 
-      await this.prismaService.$transaction([...updateStock, createOrder]);
+      await this.prismaService.$transaction([...updateStock, order]);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Internal Server Error');
