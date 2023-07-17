@@ -8,6 +8,6 @@ export const preferences = {
     'https://dev-bookstore.onrender.com/api/payments/notifications',
   statement_descriptor: 'DEV BOOKSTORE',
   payment_methods: {
-    installments: 3,
+    installments: 1,
   },
 };
