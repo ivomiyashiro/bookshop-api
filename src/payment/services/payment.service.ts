@@ -46,6 +46,7 @@ export class PaymentService {
   }
 
   async createOrderAfterPayment(paymentId: number) {
+    console.log('hola');
     try {
       const response = await fetch(
         `${this.configService.get(
