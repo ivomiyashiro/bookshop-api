@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   name      String
   password  String
-  role      Role      @default(CUSTOMER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   orders    Order[]
 }
 
@@ -37,26 +37,31 @@ model Book {
 }
 
 model Language {
-  id        Int    @id @default(autoincrement())
-  name      String @unique
-  books     Book[]
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
 }
 
 model Author {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
-  books     Book[]
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
 }
 
 model Order {
-  id          Int          @id @default(autoincrement())
-  totalPrice  Float
-  status      OrderStatus  @default(PAID)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  customer    User         @relation(fields: [customerId], references: [id])
-  customerId  Int
-  orderItems  OrderItem[]
+  id             Int            @id @default(autoincrement())
+  totalPrice     Float
+  paymentStatus  PaymentStatus  @default(PAID)
+  shippingStatus ShippingStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  customer       User           @relation(fields: [customerId], references: [id])
+  customerId     Int
+  address        String
+  province       String
+  locality       String
+  zip            String
+  orderItems     OrderItem[]
 }
 
 model OrderItem {
@@ -74,9 +79,14 @@ enum Role {
   ADMIN
 }
 
-enum OrderStatus {
+enum PaymentStatus {
   PAID
-  CANCELLED
+  PENDING
+}
+
+enum ShippingStatus {
+  DELIVERED
+  PENDING
 }
 
 enum BookStatus {
