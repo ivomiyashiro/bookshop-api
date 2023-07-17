@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
@@ -6,6 +7,7 @@ import {
   ArrayNotEmpty,
   IsNotEmpty,
   IsEnum,
+  IsNotEmptyObject,
 } from 'class-validator';
 
 enum Currency {
@@ -43,8 +45,31 @@ class ItemDto {
   unit_price: number;
 }
 
-export class ItemsToPayDto {
+class ShippingAddressDTO {
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @IsString()
+  @IsNotEmpty()
+  province: string;
+
+  @IsString()
+  @IsNotEmpty()
+  locality: string;
+
+  @IsString()
+  @IsNotEmpty()
+  zip: string;
+}
+
+export class CreatePaymentDto {
   @ValidateNested({ each: true })
   @ArrayNotEmpty()
   items: ItemDto[];
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ShippingAddressDTO)
+  shippingAddress: ShippingAddressDTO;
 }
