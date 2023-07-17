@@ -83,11 +83,11 @@ export class PaymentService {
           orderItems: {
             createMany: { data: itemsPayed },
           },
-          address: shipping_address.address,
-          province: shipping_address.province,
-          locality: shipping_address.locality,
-          zip: shipping_address.zip,
-        },
+          // address: shipping_address.address,
+          // province: shipping_address.province,
+          // locality: shipping_address.locality,
+          // zip: shipping_address.zip,
+        } as any,
       });
 
       await this.prismaService.$transaction([...updateStock, createOrder]);
