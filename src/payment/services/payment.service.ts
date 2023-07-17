@@ -60,42 +60,43 @@ export class PaymentService {
         },
       );
 
-      const { items, transaction_amount, metadata } = await response.json();
+      const { additional_info, transaction_amount, metadata } =
+        await response.json();
+      const items = additional_info.items;
       const { uid, shipping_address } = metadata;
-      console.log(response, items, transaction_amount);
+
       const itemsPayed = items.map(({ id, unit_price, quantity }) => ({
-        bookId: id,
+        bookId: parseInt(id),
         price: parseInt(unit_price),
-        quantity: quantity,
+        quantity: parseInt(quantity),
       }));
 
       const updateStock = items.map(({ id, quantity }) => {
         return this.prismaService.book.update({
-          where: { id },
-          data: { stock: { decrement: quantity } },
+          where: { id: parseInt(id) },
+          data: { stock: { decrement: parseInt(quantity) } },
         });
       });
 
       const createOrder = this.prismaService.order.create({
         data: {
-          totalPrice: transaction_amount,
-          customerId: uid,
+          customer: {
+            connect: {
+              id: uid,
+            },
+          },
           orderItems: {
             createMany: { data: itemsPayed },
           },
+          totalPrice: transaction_amount,
           address: shipping_address.address,
           province: shipping_address.province,
           locality: shipping_address.locality,
           zip: shipping_address.zip,
-        } as any,
+        },
       });
 
-      const [updatedStock, order] = await this.prismaService.$transaction([
-        ...updateStock,
-        createOrder,
-      ]);
-
-      console.log(updatedStock, order);
+      await this.prismaService.$transaction([...updateStock, createOrder]);
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error');
     }
