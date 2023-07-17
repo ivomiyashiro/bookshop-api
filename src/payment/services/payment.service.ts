@@ -89,11 +89,21 @@ export class PaymentService {
             createMany: { data: itemsPayed },
           },
           totalPrice: transaction_amount,
-          address: shipping_address.address,
-          province: shipping_address.province,
-          locality: shipping_address.locality,
-          zip: shipping_address.zip,
-        } as any,
+          shippingAddress: {
+            connectOrCreate: {
+              where: {
+                location: `${shipping_address.address.toUpperCase()}, ${shipping_address.zip.toUpperCase()} ${shipping_address.province.toUpperCase()}`,
+              },
+              create: {
+                location: `${shipping_address.address.toUpperCase()}, ${shipping_address.zip.toUpperCase()} ${shipping_address.province.toUpperCase()}`,
+                address: shipping_address.address.toUpperCase(),
+                province: shipping_address.province.toUpperCase(),
+                locality: shipping_address.locality.toUpperCase(),
+                zip: shipping_address.zip.toUpperCase(),
+              },
+            },
+          },
+        },
       });
 
       await this.prismaService.$transaction([...updateStock, createOrder]);
