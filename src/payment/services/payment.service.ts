@@ -103,7 +103,7 @@ export class PaymentService {
               },
             },
           },
-        } as any,
+        },
       });
 
       await this.prismaService.$transaction([...updateStock, order]);
