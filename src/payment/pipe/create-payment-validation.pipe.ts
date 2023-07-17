@@ -8,7 +8,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class ItemsDataValidationPipe implements PipeTransform {
+export class CreatePaymentValidationPipe implements PipeTransform {
   constructor(private prismaService: PrismaService) {}
   async transform(value: any, _metadata: ArgumentMetadata) {
     const { items } = value;

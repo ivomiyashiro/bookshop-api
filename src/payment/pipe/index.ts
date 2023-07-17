@@ -1,1 +1,2 @@
-export * from './items-data-validation.pipe';
+export * from './create-payment-validation.pipe';
+export * from './payment-data-validation.pipe';
