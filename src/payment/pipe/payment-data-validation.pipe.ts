@@ -15,6 +15,6 @@ export class PaymentDataValidationPipe implements PipeTransform {
       throw new BadRequestException(['Action requested is not valid.']);
     }
 
-    return parseInt(data.id);
+    return { id: parseInt(data.id) };
   }
 }
