@@ -70,7 +70,7 @@ model OrderItem {
   price    Float
   book     Book  @relation(fields: [bookId], references: [id])
   bookId   Int
-  order    Order @relation(fields: [orderId], references: [id])
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   orderId  Int
 }
 
