@@ -1,22 +1,32 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { JwtGuard } from '../../auth/guard';
+import { AuthUser } from '../../auth';
 import { PaymentService } from '../services/payment.service';
-import { ItemsToPayDto } from '../dto';
-import { ItemsDataValidationPipe } from '../pipe';
+import { CreatePaymentDto, PaymentIdDto } from '../dto';
+import {
+  CreatePaymentValidationPipe,
+  PaymentDataValidationPipe,
+} from '../pipe';
 
 @Controller('/api/payments')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post()
-  async createPayment(@Body(ItemsDataValidationPipe) dto: ItemsToPayDto) {
-    const payment_url = await this.paymentService.createPayment(dto);
+  @UseGuards(JwtGuard)
+  async createPayment(
+    @Body(CreatePaymentValidationPipe) dto: CreatePaymentDto,
+    @AuthUser() user: Omit<User, 'password'>,
+  ) {
+    const payment_url = await this.paymentService.createPayment(dto, user.id);
 
     return { data: { payment_url } };
   }
 
   @Post('/notifications')
-  async catchWebHook(@Body() dto: any) {
-    console.log(dto);
-    return { data: { msg: 'Recibido' } };
+  async catchWebHook(@Body(PaymentDataValidationPipe) dto: PaymentIdDto) {
+    await this.paymentService.createOrderAfterPayment(dto.id);
+    return { data: { msg: 'Ok' } };
   }
 }
