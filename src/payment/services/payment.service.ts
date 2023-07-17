@@ -46,7 +46,6 @@ export class PaymentService {
   }
 
   async createOrderAfterPayment(paymentId: number) {
-    console.log('hola');
     try {
       const response = await fetch(
         `${this.configService.get(
@@ -99,6 +98,7 @@ export class PaymentService {
 
       await this.prismaService.$transaction([...updateStock, createOrder]);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException('Internal Server Error');
     }
   }
