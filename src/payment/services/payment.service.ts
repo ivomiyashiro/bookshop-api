@@ -76,7 +76,7 @@ export class PaymentService {
         });
       });
 
-      const createOrder = await this.prismaService.order.create({
+      const createOrder = this.prismaService.order.create({
         data: {
           totalPrice: transaction_amount,
           customerId: uid,
@@ -87,10 +87,15 @@ export class PaymentService {
           province: shipping_address.province,
           locality: shipping_address.locality,
           zip: shipping_address.zip,
-        },
+        } as any,
       });
 
-      await this.prismaService.$transaction([...updateStock, createOrder]);
+      const [updatedStock, order] = await this.prismaService.$transaction([
+        ...updateStock,
+        createOrder,
+      ]);
+
+      console.log(updatedStock, order);
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error');
     }
