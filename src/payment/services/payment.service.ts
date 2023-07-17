@@ -84,8 +84,8 @@ export class PaymentService {
             createMany: { data: itemsPayed },
           },
           address: shipping_address.address,
-          locality: shipping_address.locality,
           province: shipping_address.province,
+          locality: shipping_address.locality,
           zip: shipping_address.zip,
         },
       });
