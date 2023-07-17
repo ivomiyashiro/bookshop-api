@@ -9,6 +9,7 @@ import {
 @Injectable()
 export class PaymentDataValidationPipe implements PipeTransform {
   async transform(value: any, _metadata: ArgumentMetadata) {
+    console.log(value);
     const { action, data } = value;
 
     if (action !== 'payment.created') {

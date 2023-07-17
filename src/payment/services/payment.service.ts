@@ -62,7 +62,7 @@ export class PaymentService {
 
       const { items, transaction_amount, metadata } = await response.json();
       const { uid, shipping_address } = metadata;
-
+      console.log(response, items, transaction_amount);
       const itemsPayed = items.map(({ id, unit_price, quantity }) => ({
         bookId: id,
         price: parseInt(unit_price),
