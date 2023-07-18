@@ -43,7 +43,6 @@ export class PaymentService {
   }
 
   async createOrderAfterPayment(paymentId: number) {
-    console.log('entro');
     try {
       const response = await fetch(
         `${this.configService.get(
@@ -62,7 +61,7 @@ export class PaymentService {
         await response.json();
       const items = additional_info.items;
       const { uid } = metadata;
-      console.log(additional_info);
+
       const itemsPayed = items.map(({ id, unit_price, quantity }) => ({
         bookId: parseInt(id),
         price: parseInt(unit_price),
@@ -89,7 +88,7 @@ export class PaymentService {
           totalPrice: transaction_amount,
         },
       });
-      console.log('hola');
+
       await this.prismaService.$transaction([...updateStock, order]);
     } catch (error) {
       console.log(error);
