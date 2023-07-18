@@ -52,7 +52,6 @@ model Order {
   id                Int             @id @default(autoincrement())
   totalPrice        Float
   paymentStatus     PaymentStatus   @default(PAID)
-  shippingStatus    ShippingStatus  @default(PENDING)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   customer          User            @relation(fields: [customerId], references: [id])
@@ -77,11 +76,6 @@ enum Role {
 
 enum PaymentStatus {
   PAID
-  PENDING
-}
-
-enum ShippingStatus {
-  DELIVERED
   PENDING
 }
 
