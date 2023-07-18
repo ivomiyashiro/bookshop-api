@@ -2,6 +2,7 @@
 import { Response } from 'express';
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { Prisma, Role } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import { PrismaService } from '../../prisma/prisma.service';
-import { LoginDto, SignupDto, AuthRequest } from '../';
+import { LoginDto, SignupDto, AuthRequest, Tokens, JwtPayload } from '../';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +33,7 @@ export class AuthService {
         },
       });
 
-      const { password, ...restOfUser } = user;
+      const { password, refreshToken, ...restOfUser } = user;
 
       return { ...restOfUser };
     } catch (error) {
@@ -60,13 +61,12 @@ export class AuthService {
         throw new UnauthorizedException(ERROR);
       }
 
-      const token = await this.signToken(user.id, user.email, user.role);
+      const tokens = await this.getTokens(user.id, user.email, user.role);
+      await this.updateRtHash(user.id, tokens.refresh_token);
 
-      res.cookie('ACCESS_TOKEN', token, {
-        maxAge: 12 * 60 * 60 * 1000, // 12h
-      });
+      this.saveTokensInCookies(res, tokens);
 
-      const { password, ...restOfUser } = user;
+      const { password, refreshToken, ...restOfUser } = user;
 
       return { ...restOfUser };
     } catch (error) {
@@ -80,38 +80,104 @@ export class AuthService {
     }
   }
 
+  async logout(userId: number): Promise<boolean> {
+    await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        refreshToken: { not: null },
+      },
+      data: { refreshToken: null },
+    });
+
+    return true;
+  }
+
+  async refreshTokens(
+    res: Response,
+    userId: number,
+    rt: string,
+  ): Promise<Tokens> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.refreshToken) {
+      throw new ForbiddenException('Access Denied.');
+    }
+
+    const rtMatches = await verify(user.refreshToken, rt);
+    if (!rtMatches) throw new ForbiddenException('Access Denied.d');
+
+    const tokens = await this.getTokens(user.id, user.email, user.role);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+
+    this.saveTokensInCookies(res, tokens);
+
+    return tokens;
+  }
+
   async googleAuth(req: AuthRequest, res: Response) {
     const { id, email, role } = req.user;
 
-    const token = await this.signToken(id, email, role);
+    const tokens = await this.getTokens(id, email, role);
 
-    if (!token) {
+    if (!tokens) {
       return res.redirect(this.config.get('CLIENT_ORIGIN'));
     }
 
-    res.cookie('ACCESS_TOKEN', token, {
-      maxAge: 12 * 60 * 60 * 1000, // 12h
-    });
+    await this.updateRtHash(id, tokens.refresh_token);
+
+    this.saveTokensInCookies(res, tokens);
 
     return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
 
-  async signToken(userId: number, email: string, role: Role): Promise<string> {
-    const payload = {
+  async updateRtHash(userId: number, rt: string): Promise<void> {
+    const hashedRefreshToken = await hash(rt);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashedRefreshToken },
+    });
+  }
+
+  async getTokens(userId: number, email: string, role: Role): Promise<Tokens> {
+    const jwtPayload: JwtPayload = {
       sub: userId,
-      email,
       role,
+      email,
     };
 
-    try {
-      const token = await this.jwt.signAsync(payload, {
-        expiresIn: '12h',
-        secret: this.config.get('JWT_SECRET'),
-      });
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwt.signAsync(jwtPayload, {
+        secret: this.config.get<string>('JWT_ACCESS_SECRET'),
+        expiresIn: '15m',
+      }),
+      this.jwt.signAsync(jwtPayload, {
+        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
+      }),
+    ]);
 
-      return token;
-    } catch (error) {
-      return null;
-    }
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
+
+  saveTokensInCookies(res: Response, tokens: Tokens) {
+    const { access_token, refresh_token } = tokens;
+
+    res.cookie('ACCESS_TOKEN', access_token, {
+      maxAge: 900000, // 15m
+      httpOnly: true,
+      sameSite: true,
+    });
+
+    res.cookie('REFRESH_TOKEN', refresh_token, {
+      maxAge: 604800000, // 1w
+      httpOnly: true,
+      sameSite: true,
+    });
   }
 }

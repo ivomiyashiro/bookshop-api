@@ -19,6 +19,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
+  refreshToken String?
 }
 
 model Book {

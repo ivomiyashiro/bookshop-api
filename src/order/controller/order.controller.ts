@@ -9,20 +9,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Role, User } from '@prisma/client';
-import { AuthUser } from 'src/auth';
-import { JwtGuard } from 'src/auth/guard';
 import { OrderService } from '../service/order.service';
 import { OrderQueryValidation } from '../pipe';
 import { Roles } from 'src/user/decorator';
 import { RolesGuard } from 'src/user/guard';
 import { UpdateOrderDto } from '../dto';
+import { AuthUser } from 'src/common/decorators';
 
 @Controller('api')
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
   @Get('/storefront/orders')
-  @UseGuards(JwtGuard)
   async getMyOrders(
     @Query(OrderQueryValidation) params: any,
     @AuthUser() me: Omit<User, 'password'>,
@@ -36,7 +34,6 @@ export class OrderController {
   }
 
   @Get('/storefront/orders/:id')
-  @UseGuards(JwtGuard)
   async getMyOrder(
     @Param('id', new ParseIntPipe()) id: number,
     @AuthUser() me: Omit<User, 'password'>,
@@ -48,7 +45,7 @@ export class OrderController {
 
   @Get('/admin/orders')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async getOrders(@Query(OrderQueryValidation) params: any) {
     const { orders, count, totalCount } = await this.orderService.getOrders(
       params,
@@ -59,7 +56,7 @@ export class OrderController {
 
   @Put('/admin/orders/:id')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async updateOrder(
     @Param('id', new ParseIntPipe()) id: number,
     @Body() dto: UpdateOrderDto,

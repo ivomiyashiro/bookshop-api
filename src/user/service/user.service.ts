@@ -27,7 +27,7 @@ export class UserService {
         data: { ...dto },
       });
 
-      const token = await this.authService.signToken(
+      const token = await this.authService.getTokens(
         user.id,
         user.email,
         user.role,

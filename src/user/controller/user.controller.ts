@@ -12,9 +12,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Role, User } from '@prisma/client';
-import { JwtGuard } from '../../auth/guard';
-import { AuthUser } from '../../auth';
 import { UserService } from '../service/user.service';
+import { AuthUser } from 'src/common/decorators';
 import { UpdateMeDto, UpdateUserDto } from '../dto';
 import { Roles } from '../decorator';
 import { RolesGuard } from '../guard';
@@ -25,13 +24,11 @@ import { UserFilterPipe, UpdateMePipe, UpdateUserPipe } from '../pipe';
 export class UserController {
   constructor(private userService: UserService) {}
   // Client routers --->
-  @UseGuards(JwtGuard)
   @Get('storefront/users/me')
   getMe(@AuthUser() user: User) {
     return { data: { user } };
   }
 
-  @UseGuards(JwtGuard)
   @Put('storefront/users/me')
   async updateMe(
     @Body(UpdateMePipe) dto: UpdateMeDto,
@@ -46,7 +43,7 @@ export class UserController {
   // Admin routers --->
   @Get('admin/users')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async getUsers(@Query(UserFilterPipe) query: IQuery) {
     const { users, count, totalCount } = await this.userService.getUsers(query);
 
@@ -55,7 +52,7 @@ export class UserController {
 
   @Get('admin/users/:id')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async getUser(@Param('id', new ParseIntPipe()) id: number) {
     const user = await this.userService.getUser(id);
 
@@ -64,7 +61,7 @@ export class UserController {
 
   @Put('admin/users/:id')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async updateUsers(
     @Body(UpdateUserPipe) dto: UpdateUserDto,
     @Param('id', new ParseIntPipe()) id: number,
@@ -76,7 +73,7 @@ export class UserController {
 
   @Delete('admin/users/:id')
   @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   async deleteUsers(@Param('id', new ParseIntPipe()) id: number) {
     await this.userService.deleteUser(id);
 

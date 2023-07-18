@@ -1,8 +1,6 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { JwtGuard } from '../../auth/guard';
-import { AuthUser } from '../../auth';
+import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from '../services/payment.service';
+import { AuthUserId } from 'src/common/decorators';
 import { CreatePaymentDto, PaymentIdDto } from '../dto';
 import {
   CreatePaymentValidationPipe,
@@ -14,12 +12,11 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post()
-  @UseGuards(JwtGuard)
   async createPayment(
     @Body(CreatePaymentValidationPipe) dto: CreatePaymentDto,
-    @AuthUser() user: Omit<User, 'password'>,
+    @AuthUserId() uid: number,
   ) {
-    const payment_url = await this.paymentService.createPayment(dto, user.id);
+    const payment_url = await this.paymentService.createPayment(dto, uid);
 
     return { data: { payment_url } };
   }

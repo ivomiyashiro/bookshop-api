@@ -189,7 +189,7 @@ describe('AuthService', () => {
 
     it('should authenticate the user with Google and redirect to the client', async () => {
       const signTokenMock = jest
-        .spyOn(authService, 'signToken')
+        .spyOn(authService, 'getTokens')
         .mockResolvedValueOnce('accessToken');
 
       jest.spyOn(configService, 'get').mockReturnValueOnce('CLIENT_ORIGIN');
@@ -225,7 +225,7 @@ describe('AuthService', () => {
       jest.spyOn(configService, 'get').mockReturnValueOnce('secret');
 
       // Execute the signToken method
-      const result = await authService.signToken(userId, email, role);
+      const result = await authService.getTokens(userId, email, role);
 
       // Assertions
       expect(signAsyncMock).toHaveBeenCalledWith(
@@ -243,7 +243,7 @@ describe('AuthService', () => {
       jest.spyOn(configService, 'get').mockReturnValueOnce('secret');
 
       // Execute the signToken method
-      const result = await authService.signToken(userId, email, role);
+      const result = await authService.getTokens(userId, email, role);
 
       // Assertions
       expect(signAsyncMock).toHaveBeenCalledWith(
