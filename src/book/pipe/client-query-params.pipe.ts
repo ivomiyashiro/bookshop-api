@@ -20,8 +20,6 @@ export class ClientQueryParamsPipe implements PipeTransform {
     const VALID_SORTBY = ['desc', 'asc', undefined];
     const VALID_ORDERBY = ['title', 'price', 'createdAt', undefined];
 
-    const where: any = {};
-
     if (isNaN(Number(limit))) {
       throw new BadRequestException(`Limit ${limit} is not valid`);
     }
@@ -37,6 +35,9 @@ export class ClientQueryParamsPipe implements PipeTransform {
     if (!VALID_ORDERBY.includes(orderBy)) {
       throw new BadRequestException(`OrderBy ${orderBy} is not valid`);
     }
+
+    const where: any = {};
+    where.status = 'VISIBLE';
 
     if (filters) {
       const filtersObj = JSON.parse(filters);
