@@ -45,31 +45,8 @@ class ItemDto {
   unit_price: number;
 }
 
-class ShippingAddressDTO {
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-
-  @IsString()
-  @IsNotEmpty()
-  province: string;
-
-  @IsString()
-  @IsNotEmpty()
-  locality: string;
-
-  @IsString()
-  @IsNotEmpty()
-  zip: string;
-}
-
 export class CreatePaymentDto {
   @ValidateNested({ each: true })
   @ArrayNotEmpty()
   items: ItemDto[];
-
-  @IsNotEmptyObject()
-  @ValidateNested()
-  @Type(() => ShippingAddressDTO)
-  shippingAddress: ShippingAddressDTO;
 }

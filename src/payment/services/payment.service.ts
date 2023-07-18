@@ -29,9 +29,6 @@ export class PaymentService {
             ...preferences,
             metadata: {
               uid,
-              shippingAddress: {
-                ...dto.shippingAddress,
-              },
             },
           }),
         },
@@ -63,7 +60,7 @@ export class PaymentService {
       const { additional_info, transaction_amount, metadata } =
         await response.json();
       const items = additional_info.items;
-      const { uid, shipping_address } = metadata;
+      const { uid } = metadata;
 
       const itemsPayed = items.map(({ id, unit_price, quantity }) => ({
         bookId: parseInt(id),
@@ -89,20 +86,6 @@ export class PaymentService {
             createMany: { data: itemsPayed },
           },
           totalPrice: transaction_amount,
-          shippingAddress: {
-            connectOrCreate: {
-              where: {
-                location: `${shipping_address.address.toUpperCase()}, ${shipping_address.zip.toUpperCase()} ${shipping_address.province.toUpperCase()}`,
-              },
-              create: {
-                location: `${shipping_address.address.toUpperCase()}, ${shipping_address.zip.toUpperCase()} ${shipping_address.province.toUpperCase()}`,
-                address: shipping_address.address.toUpperCase(),
-                province: shipping_address.province.toUpperCase(),
-                locality: shipping_address.locality.toUpperCase(),
-                zip: shipping_address.zip.toUpperCase(),
-              },
-            },
-          },
         },
       });
 
