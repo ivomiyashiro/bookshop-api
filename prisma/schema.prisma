@@ -51,7 +51,7 @@ model Author {
 model Order {
   id                Int             @id @default(autoincrement())
   totalPrice        Float
-  paymentStatus     PaymentStatus   @default(PAID)
+  status            OrderStatus     @default(PAID)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   customer          User            @relation(fields: [customerId], references: [id])
@@ -74,7 +74,8 @@ enum Role {
   ADMIN
 }
 
-enum PaymentStatus {
+enum OrderStatus {
+  CANCELLED
   PAID
   PENDING
 }
