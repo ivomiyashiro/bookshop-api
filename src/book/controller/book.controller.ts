@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   AdminQueryParamsPipe,
@@ -16,6 +17,10 @@ import {
 } from '../pipe';
 import { CreateBookDto, UpdateBookDto } from '../dto';
 import { BookService } from '../service/book.service';
+import { Roles } from 'src/user/decorator';
+import { Role } from '@prisma/client';
+import { JwtGuard } from 'src/auth/guard';
+import { RolesGuard } from 'src/user/guard';
 
 @Controller('api/')
 export class BookController {
@@ -37,6 +42,8 @@ export class BookController {
 
   // Admin routes --->
   @Get('admin/books')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async getAdminBooks(@Query(AdminQueryParamsPipe) query: any) {
     const { books, count, totalCount } = await this.bookService.getAdminBooks(
       query,
@@ -46,6 +53,8 @@ export class BookController {
   }
 
   @Post('admin/books')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async createBook(@Body() dto: CreateBookDto) {
     const book = await this.bookService.createBook(dto);
 
@@ -53,6 +62,8 @@ export class BookController {
   }
 
   @Get('admin/books/:id')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async getAdminBook(@Param('id', new ParseIntPipe()) id: number) {
     const book = await this.bookService.getAdminBook(id);
 
@@ -60,6 +71,8 @@ export class BookController {
   }
 
   @Put('admin/books/:id')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async updateBook(
     @Param('id', new ParseIntPipe()) id: number,
     @Body(UpdateBookPipe) dto: UpdateBookDto,
@@ -70,6 +83,8 @@ export class BookController {
   }
 
   @Delete('admin/books/:id')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async deleteBook(@Param('id', new ParseIntPipe()) id: number) {
     await this.bookService.deleteBook(id);
 
