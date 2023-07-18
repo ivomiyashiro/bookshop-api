@@ -1,4 +1,4 @@
-import { IsNotIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { BookStatus } from '@prisma/client';
 
 export class UpdateBookDto {
@@ -26,7 +26,7 @@ export class UpdateBookDto {
 
   @IsOptional()
   @IsString()
-  @IsNotIn(['VISIBLE', 'HIDDEN'], { message: 'Invalid book status' })
+  @IsIn(['VISIBLE', 'HIDDEN'], { message: 'Invalid book status' })
   status: BookStatus;
 
   @IsOptional()
