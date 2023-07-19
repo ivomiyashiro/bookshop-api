@@ -13,8 +13,11 @@
 ## 💻 Features
 
 ⭐️ JWT access and refresh tokens
+
 ⭐️ RBAC (Role Base Access Control)
+
 ⭐️ Payments integration with MercadoPago API
+
 ⭐️ Filters and pagination
 
 ## 🛠 Installation
