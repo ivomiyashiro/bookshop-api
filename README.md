@@ -1,8 +1,8 @@
-# 📖 Dev Bookstore
+# 📖 Bookshop API
 
- An innovative online bookstore that aims to provide book and coding lovers with a seamless and convenient shopping experience.
+A robust and high quality REST API for a book e-commerce. Developed using Nest.js, a powerful and scalable Node.js framework and meticulously tested with Jest, ensuring the highest level of code quality and reliability.
 
-## 😁 Technologies
+## 😁 Crafted with
 
 ✅ Nest.js
 
@@ -10,11 +10,13 @@
 
 ✅ PostgreSQL
 
-## 💻 Features
+## 🌟 Features
 
 ⭐️ JWT access and refresh tokens
 
 ⭐️ RBAC (Role Base Access Control)
+
+⭐️ Google OAuth
 
 ⭐️ Payments integration with MercadoPago API
 
