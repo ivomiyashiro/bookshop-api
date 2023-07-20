@@ -29,6 +29,7 @@ model Book {
   price       Float
   image       String
   stock       Int
+  slug        String      @unique
   status      BookStatus  @default(VISIBLE)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

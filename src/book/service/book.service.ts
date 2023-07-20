@@ -30,6 +30,7 @@ export class BookService {
             price: true,
             image: true,
             stock: true,
+            slug: true,
             createdAt: true,
             updatedAt: true,
             authors: true,
@@ -60,6 +61,7 @@ export class BookService {
           price: true,
           image: true,
           stock: true,
+          slug: true,
           createdAt: true,
           updatedAt: true,
           authors: true,
@@ -84,6 +86,7 @@ export class BookService {
       const book = await this.prismaService.book.create({
         data: {
           ...dto,
+          slug: this.slugfy(dto.title),
           authors: {
             connectOrCreate: dto.authors.map((author: string) => ({
               where: { name: author },
@@ -206,5 +209,15 @@ export class BookService {
 
       throw error;
     }
+  }
+
+  slugfy(title: string) {
+    return title
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 ]/g, '')
+      .replace(/\s+/g, '-');
   }
 }

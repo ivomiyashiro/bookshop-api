@@ -2,10 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('CUSTOMER', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PAID', 'PENDING');
-
--- CreateEnum
-CREATE TYPE "ShippingStatus" AS ENUM ('DELIVERED', 'PENDING');
+CREATE TYPE "OrderStatus" AS ENUM ('CANCELLED', 'PAID', 'PENDING');
 
 -- CreateEnum
 CREATE TYPE "BookStatus" AS ENUM ('VISIBLE', 'HIDDEN');
@@ -19,6 +16,7 @@ CREATE TABLE "User" (
     "role" "Role" NOT NULL DEFAULT 'CUSTOMER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "refreshToken" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -31,6 +29,7 @@ CREATE TABLE "Book" (
     "price" DOUBLE PRECISION NOT NULL,
     "image" TEXT NOT NULL,
     "stock" INTEGER NOT NULL,
+    "slug" TEXT NOT NULL,
     "status" "BookStatus" NOT NULL DEFAULT 'VISIBLE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -58,12 +57,10 @@ CREATE TABLE "Author" (
 CREATE TABLE "Order" (
     "id" SERIAL NOT NULL,
     "totalPrice" DOUBLE PRECISION NOT NULL,
-    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PAID',
-    "shippingStatus" "ShippingStatus" NOT NULL DEFAULT 'PENDING',
+    "status" "OrderStatus" NOT NULL DEFAULT 'PAID',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "customerId" INTEGER NOT NULL,
-    "shippingAddressId" INTEGER NOT NULL,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -77,18 +74,6 @@ CREATE TABLE "OrderItem" (
     "orderId" INTEGER NOT NULL,
 
     CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "ShippingAddress" (
-    "id" SERIAL NOT NULL,
-    "location" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
-    "province" TEXT NOT NULL,
-    "locality" TEXT NOT NULL,
-    "zip" TEXT NOT NULL,
-
-    CONSTRAINT "ShippingAddress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -110,13 +95,13 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Book_title_key" ON "Book"("title");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Book_slug_key" ON "Book"("slug");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Language_name_key" ON "Language"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Author_name_key" ON "Author"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ShippingAddress_location_key" ON "ShippingAddress"("location");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_BookToLanguage_AB_unique" ON "_BookToLanguage"("A", "B");
@@ -132,9 +117,6 @@ CREATE INDEX "_AuthorToBook_B_index" ON "_AuthorToBook"("B");
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_shippingAddressId_fkey" FOREIGN KEY ("shippingAddressId") REFERENCES "ShippingAddress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
