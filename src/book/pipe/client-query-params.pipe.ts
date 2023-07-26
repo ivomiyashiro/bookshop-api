@@ -14,7 +14,10 @@ export class ClientQueryParamsPipe implements PipeTransform {
       offset = 0,
       orderBy = 'title',
       sortBy = 'asc',
-      filters,
+      searchText,
+      languages,
+      authors,
+      price,
     } = value;
 
     const VALID_SORTBY = ['desc', 'asc', undefined];
@@ -39,59 +42,55 @@ export class ClientQueryParamsPipe implements PipeTransform {
     const where: any = {};
     where.status = 'VISIBLE';
 
-    if (filters) {
-      const filtersObj = JSON.parse(filters);
-
-      if (filtersObj.searchText) {
-        where.OR = [
-          { title: { contains: filtersObj.searchText, mode: 'insensitive' } },
-          {
-            authors: {
-              every: {
-                name: { contains: filtersObj.searchText, mode: 'insensitive' },
-              },
+    if (searchText) {
+      where.OR = [
+        { title: { contains: searchText, mode: 'insensitive' } },
+        {
+          authors: {
+            every: {
+              name: { contains: searchText, mode: 'insensitive' },
             },
           },
-        ];
-      }
-
-      if (filtersObj.languages) {
-        where.languages = {
-          some: {
-            id: { in: filtersObj.languages },
+        },
+        {
+          languages: {
+            every: {
+              name: { contains: searchText, mode: 'insensitive' },
+            },
           },
-        };
-      }
+        },
+      ];
+    }
 
-      if (filtersObj.authors) {
-        where.authors = {
-          some: {
-            id: { in: filtersObj.authors },
-          },
-        };
-      }
+    if (languages) {
+      where.languages = {
+        some: {
+          name: { in: languages.split(','), mode: 'insensitive' },
+        },
+      };
+    }
 
-      if (filtersObj.price) {
-        if (filtersObj.price.max && filtersObj.price.min) {
-          where.price = {
-            gte: filtersObj.price.min,
-            lte: filtersObj.price.max,
-          };
-        } else if (filtersObj.price.min) {
-          where.price = {
-            gte: filtersObj.price.min,
-          };
-        } else if (filtersObj.price.max) {
-          where.price = {
-            lte: filtersObj.price.max,
-          };
-        }
-      }
+    if (authors) {
+      where.authors = {
+        some: {
+          name: { in: authors.split(','), mode: 'insensitive' },
+        },
+      };
+    }
+
+    if (price) {
+      const allNumbers = price.match(/\d+/g).map(Number);
+      const prices = Array.from(new Set(allNumbers)) as number[];
+
+      where.price = {
+        gte: Math.min(...prices),
+        lte: Math.max(...prices),
+      };
     }
 
     return {
-      limit: Number(limit),
-      offset: Number(offset),
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       orderBy,
       sortBy,
       where,
