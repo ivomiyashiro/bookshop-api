@@ -35,6 +35,31 @@ export class BookController {
   }
 
   @Public()
+  @Get('storefront/books/authors')
+  async getBooksAuthors() {
+    const { authors, count, totalCount } =
+      await this.bookService.getBooksAuthors();
+
+    return { data: { authors, count, totalCount } };
+  }
+
+  @Public()
+  @Get('storefront/books/languages')
+  async getBooksLanguages() {
+    const { languages, count, totalCount } =
+      await this.bookService.getBooksLanguages();
+
+    return { data: { languages, count, totalCount } };
+  }
+
+  @Public()
+  @Get('storefront/books/price')
+  async getBooksMinMaxPrice() {
+    const { min, max } = await this.bookService.getBooksMinMaxPrice();
+    return { data: { price: { min, max } } };
+  }
+
+  @Public()
   @Get('storefront/books/:id')
   async getBook(@Param('id', new ParseIntPipe()) id: number) {
     const book = await this.bookService.getBook(id);
