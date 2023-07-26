@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
   Injectable,
@@ -46,6 +47,10 @@ export class BookService {
         throw new BadRequestException([`Validation error`]);
       }
 
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
+      }
+
       throw new InternalServerErrorException('Internal server error.');
     }
   }
@@ -75,6 +80,10 @@ export class BookService {
         if (error.code === 'P2025') {
           throw new NotFoundException([`Book with id ${id} not found.`]);
         }
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
       }
 
       throw error;
@@ -112,6 +121,10 @@ export class BookService {
         if (error.code === 'P2002') {
           throw new ConflictException([`Duplicate book title.`]);
         }
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
       }
 
       throw error;
@@ -154,6 +167,10 @@ export class BookService {
         if (error.code === 'P2025') {
           throw new NotFoundException([`Book with id ${id} not found.`]);
         }
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
       }
 
       throw error;
@@ -205,6 +222,72 @@ export class BookService {
         if (error.code === 'P2025') {
           throw new NotFoundException([`Book with id ${id} not found.`]);
         }
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
+      }
+
+      throw error;
+    }
+  }
+
+  async getBooksAuthors() {
+    try {
+      const [authors, totalCount] = await this.prismaService.$transaction([
+        this.prismaService.author.findMany(),
+        this.prismaService.author.count(),
+      ]);
+
+      return { authors, count: authors.length, totalCount };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
+      }
+
+      throw error;
+    }
+  }
+
+  async getBooksLanguages() {
+    try {
+      const [languages, totalCount] = await this.prismaService.$transaction([
+        this.prismaService.language.findMany(),
+        this.prismaService.language.count(),
+      ]);
+
+      return { languages, count: languages.length, totalCount };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
+      }
+
+      throw error;
+    }
+  }
+
+  async getBooksMinMaxPrice() {
+    const select = { price: true };
+    try {
+      const [min, max] = await this.prismaService.$transaction([
+        this.prismaService.book.findFirst({
+          orderBy: {
+            price: 'asc',
+          },
+          select,
+        }),
+        this.prismaService.book.findFirst({
+          orderBy: {
+            price: 'desc',
+          },
+          select,
+        }),
+      ]);
+
+      return { min: min.price, max: max.price };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
       }
 
       throw error;
