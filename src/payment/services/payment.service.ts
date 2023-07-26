@@ -91,7 +91,6 @@ export class PaymentService {
 
       await this.prismaService.$transaction([...updateStock, order]);
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException('Internal Server Error');
     }
   }
