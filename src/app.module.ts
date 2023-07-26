@@ -14,7 +14,7 @@ import { OrdersModule } from './order/order.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
-      ttl: 60,
+      ttl: process.env.NODE_ENV === 'development' ? 1 : 60,
       limit: 120,
     }),
     PrismaModule,
