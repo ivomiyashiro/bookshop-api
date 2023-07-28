@@ -10,7 +10,7 @@ import {
 export class AdminQueryParamsPipe implements PipeTransform {
   transform(value: any, _metadata: ArgumentMetadata) {
     const {
-      limit = 10,
+      limit = 12,
       offset = 0,
       orderBy = 'title',
       sortBy = 'asc',
