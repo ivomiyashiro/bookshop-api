@@ -15,7 +15,7 @@ export class BookService {
   constructor(private prismaService: PrismaService) {}
 
   async getBooks(query: any) {
-    const { limit, offset, orderBy, sortBy, where } = query;
+    const { page, limit, offset, orderBy, sortBy, where } = query;
 
     try {
       const [books, totalCount] = await this.prismaService.$transaction([
@@ -38,10 +38,16 @@ export class BookService {
             languages: true,
           },
         }),
-        this.prismaService.book.count(),
+        this.prismaService.book.count({ where }),
       ]);
 
-      return { books, count: books.length, totalCount };
+      return {
+        books,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
+        count: books.length,
+        totalCount,
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientValidationError) {
         throw new BadRequestException([`Validation error`]);

@@ -29,9 +29,20 @@ export class BookController {
   @Public()
   @Get('storefront/books')
   async getBooks(@Query(ClientQueryParamsPipe) query: any) {
-    const { books, count, totalCount } = await this.bookService.getBooks(query);
+    const { books, page, totalPages, count, totalCount } =
+      await this.bookService.getBooks(query);
 
-    return { data: { books, count, totalCount } };
+    return {
+      data: {
+        books,
+        pagination: {
+          page,
+          totalPages,
+          count,
+          totalCount,
+        },
+      },
+    };
   }
 
   @Public()
