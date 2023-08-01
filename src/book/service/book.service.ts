@@ -61,7 +61,7 @@ export class BookService {
     }
   }
 
-  async getBook(id: number) {
+  async getBookById(id: number) {
     try {
       const book = await this.prismaService.book.findUniqueOrThrow({
         where: { id },
@@ -85,6 +85,41 @@ export class BookService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundException([`Book with id ${id} not found.`]);
+        }
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
+      }
+
+      throw error;
+    }
+  }
+
+  async getBookByHandle(slug: string) {
+    try {
+      const book = await this.prismaService.book.findUniqueOrThrow({
+        where: { slug },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          image: true,
+          stock: true,
+          slug: true,
+          createdAt: true,
+          updatedAt: true,
+          authors: true,
+          languages: true,
+        },
+      });
+
+      return book;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException([`Book with slug ${slug} not found.`]);
         }
       }
 

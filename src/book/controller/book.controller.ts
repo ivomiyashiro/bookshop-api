@@ -72,8 +72,16 @@ export class BookController {
 
   @Public()
   @Get('storefront/books/:id')
-  async getBook(@Param('id', new ParseIntPipe()) id: number) {
-    const book = await this.bookService.getBook(id);
+  async getBookById(@Param('id', new ParseIntPipe()) id: number) {
+    const book = await this.bookService.getBookById(id);
+
+    return { data: { book } };
+  }
+
+  @Public()
+  @Get('storefront/books/slug/:slug')
+  async getBookByHandle(@Param() params: { slug: string }) {
+    const book = await this.bookService.getBookByHandle(params.slug);
 
     return { data: { book } };
   }
