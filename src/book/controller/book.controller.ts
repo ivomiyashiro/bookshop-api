@@ -14,6 +14,7 @@ import {
   AdminQueryParamsPipe,
   ClientQueryParamsPipe,
   UpdateBookPipe,
+  AdaptQueryFieldsPipe,
 } from '../pipe';
 import { CreateBookDto, UpdateBookDto } from '../dto';
 import { BookService } from '../service/book.service';
@@ -72,8 +73,11 @@ export class BookController {
 
   @Public()
   @Get('storefront/books/:id')
-  async getBookById(@Param('id', new ParseIntPipe()) id: number) {
-    const book = await this.bookService.getBookById(id);
+  async getBookById(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Query(AdaptQueryFieldsPipe) fields?: string[],
+  ) {
+    const book = await this.bookService.getBookById(id, fields);
 
     return { data: { book } };
   }

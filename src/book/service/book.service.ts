@@ -61,23 +61,11 @@ export class BookService {
     }
   }
 
-  async getBookById(id: number) {
+  async getBookById(id: number, fields?: string[]) {
     try {
       const book = await this.prismaService.book.findUniqueOrThrow({
         where: { id },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          price: true,
-          image: true,
-          stock: true,
-          slug: true,
-          createdAt: true,
-          updatedAt: true,
-          authors: true,
-          languages: true,
-        },
+        select: this.selectBookFields(fields),
       });
 
       return book;
@@ -333,6 +321,24 @@ export class BookService {
 
       throw error;
     }
+  }
+
+  selectBookFields(fields: string[]) {
+    return fields
+      ? fields.reduce((acc, field) => ({ ...acc, [field]: true }), {})
+      : {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          image: true,
+          stock: true,
+          slug: true,
+          createdAt: true,
+          updatedAt: true,
+          authors: true,
+          languages: true,
+        };
   }
 
   slugfy(title: string) {
