@@ -121,7 +121,7 @@ export class BookService {
 
   async createBook(dto: CreateBookDto) {
     let books: Book[];
-    console.log(dto);
+
     try {
       books = await Promise.all(
         dto.books.map(async (dto: BookDto) => {
