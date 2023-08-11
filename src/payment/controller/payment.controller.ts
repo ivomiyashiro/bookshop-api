@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from '../services/payment.service';
-import { AuthUserId } from 'src/common/decorators';
+import { AuthUserId, Public } from 'src/common/decorators';
 import { CreatePaymentDto, PaymentIdDto } from '../dto';
 import {
   CreatePaymentValidationPipe,
@@ -22,6 +22,7 @@ export class PaymentController {
   }
 
   @Post('/notifications')
+  @Public()
   async catchWebHook(@Body(PaymentDataValidationPipe) dto: PaymentIdDto) {
     await this.paymentService.catchWebHook(dto.id);
 
