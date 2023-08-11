@@ -189,24 +189,24 @@ export class AuthService {
 
     res.cookie('ACCESS_TOKEN', access_token, {
       maxAge: 900000, // 15m
-      sameSite: 'strict',
+      sameSite: 'lax',
     });
 
     res.cookie('REFRESH_TOKEN', refresh_token, {
       maxAge: 604800000, // 1w
-      sameSite: 'strict',
+      sameSite: 'lax',
     });
   }
 
   removeTokensInCookies(res: Response) {
     res.cookie('ACCESS_TOKEN', '', {
       maxAge: 0,
-      sameSite: 'strict',
+      sameSite: 'lax',
     });
 
     res.cookie('REFRESH_TOKEN', '', {
       maxAge: 0,
-      sameSite: 'strict',
+      sameSite: 'lax',
     });
   }
 }
