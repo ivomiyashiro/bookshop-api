@@ -141,13 +141,14 @@ export class AuthService {
     const { id, email, role } = req.user;
 
     const tokens = await this.getTokens(id, email, role);
+    console.log(tokens);
 
     if (!tokens) {
       return res.redirect(this.config.get('CLIENT_ORIGIN'));
     }
 
     await this.updateRtHash(id, tokens.refresh_token);
-    console.log(tokens);
+    console.log('hola');
     this.saveTokensInCookies(res, tokens);
   }
 
