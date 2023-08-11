@@ -23,7 +23,8 @@ export class PaymentController {
 
   @Post('/notifications')
   async catchWebHook(@Body(PaymentDataValidationPipe) dto: PaymentIdDto) {
-    await this.paymentService.createOrderAfterPayment(dto.id);
+    await this.paymentService.catchWebHook(dto.id);
+
     return { data: { message: 'OK' } };
   }
 }

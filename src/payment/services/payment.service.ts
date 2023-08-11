@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentDto } from '../dto';
 import { preferences } from '../preferences';
-import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
@@ -42,7 +42,7 @@ export class PaymentService {
     }
   }
 
-  async createOrderAfterPayment(paymentId: number) {
+  async catchWebHook(paymentId: number) {
     try {
       const response = await fetch(
         `${this.configService.get(
