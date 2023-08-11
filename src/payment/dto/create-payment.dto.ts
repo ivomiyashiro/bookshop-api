@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
@@ -7,7 +6,6 @@ import {
   ArrayNotEmpty,
   IsNotEmpty,
   IsEnum,
-  IsNotEmptyObject,
 } from 'class-validator';
 
 enum Currency {
