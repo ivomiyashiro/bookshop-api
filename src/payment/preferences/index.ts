@@ -1,8 +1,8 @@
 export const preferences = {
   back_urls: {
-    success: 'http://www.localhost:3000/success',
-    failure: 'http://www.localhost:3000/failure',
-    pending: 'http://www.localhost:3000/pending',
+    success: 'http://localhost:3000/success',
+    failure: 'http://localhost:3000/failure',
+    pending: 'http://localhost:3000/pending',
   },
   notification_url:
     'https://dev-bookstore.onrender.com/api/payments/notifications',
