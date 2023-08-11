@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Response } from 'express';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -8,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Prisma, Role } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto, SignupDto, AuthRequest, Tokens, JwtPayload } from '../';
@@ -33,9 +34,10 @@ export class AuthService {
         },
       });
 
-      const { password, refreshToken, ...restOfUser } = user;
+      const { password, refreshToken, createdAt, updatedAt, ...restOfUser } =
+        user;
 
-      return { ...restOfUser };
+      return { user: restOfUser };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -58,7 +60,7 @@ export class AuthService {
       const passwordMatch = await verify(user.password, dto.password);
 
       if (!passwordMatch) {
-        throw new UnauthorizedException(ERROR);
+        throw new BadRequestException(ERROR);
       }
 
       const tokens = await this.getTokens(user.id, user.email, user.role);
@@ -66,9 +68,10 @@ export class AuthService {
 
       this.saveTokensInCookies(res, tokens);
 
-      const { password, refreshToken, ...restOfUser } = user;
+      const { password, refreshToken, createdAt, updatedAt, ...restOfUser } =
+        user;
 
-      return { ...restOfUser };
+      return { user: restOfUser, tokens };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -80,25 +83,38 @@ export class AuthService {
     }
   }
 
-  async logout(userId: number): Promise<boolean> {
-    await this.prisma.user.updateMany({
-      where: {
-        id: userId,
-        refreshToken: { not: null },
-      },
-      data: { refreshToken: null },
-    });
+  async logout(userId: number, res: Response): Promise<boolean> {
+    try {
+      await this.prisma.user.updateMany({
+        where: {
+          id: userId,
+          refreshToken: { not: null },
+        },
+        data: { refreshToken: null },
+      });
 
-    return true;
+      this.removeTokensInCookies(res);
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async refreshTokens(
     res: Response,
     userId: number,
     rt: string,
-  ): Promise<Tokens> {
+  ): Promise<{ user: Partial<User>; tokens: Tokens }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        refreshToken: true,
+      },
     });
 
     if (!user || !user.refreshToken) {
@@ -106,14 +122,19 @@ export class AuthService {
     }
 
     const rtMatches = await verify(user.refreshToken, rt);
-    if (!rtMatches) throw new ForbiddenException('Access Denied.d');
+    if (!rtMatches) throw new ForbiddenException('Access Denied.');
 
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
 
     this.saveTokensInCookies(res, tokens);
 
-    return tokens;
+    const { refreshToken, ...restOfUser } = user;
+
+    return {
+      user: restOfUser,
+      tokens,
+    };
   }
 
   async googleAuth(req: AuthRequest, res: Response) {
@@ -128,8 +149,6 @@ export class AuthService {
     await this.updateRtHash(id, tokens.refresh_token);
 
     this.saveTokensInCookies(res, tokens);
-
-    return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
 
   async updateRtHash(userId: number, rt: string): Promise<void> {
@@ -170,14 +189,24 @@ export class AuthService {
 
     res.cookie('ACCESS_TOKEN', access_token, {
       maxAge: 900000, // 15m
-      httpOnly: true,
-      sameSite: true,
+      sameSite: 'strict',
     });
 
     res.cookie('REFRESH_TOKEN', refresh_token, {
       maxAge: 604800000, // 1w
-      httpOnly: true,
-      sameSite: true,
+      sameSite: 'strict',
+    });
+  }
+
+  removeTokensInCookies(res: Response) {
+    res.cookie('ACCESS_TOKEN', '', {
+      maxAge: 0,
+      sameSite: 'strict',
+    });
+
+    res.cookie('REFRESH_TOKEN', '', {
+      maxAge: 0,
+      sameSite: 'strict',
     });
   }
 }

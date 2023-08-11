@@ -11,6 +11,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthRequest, SignupDto, LoginDto } from '../';
 import { AuthService } from '../service/auth.service';
 import { AuthUserId } from '../../common/decorators/get-user-id.decorator';
@@ -20,13 +21,13 @@ import { RtGuard } from 'src/common/guard';
 // Controller handles api routes
 @Controller('api/auth')
 export class AuthController {
-  constructor(private auth: AuthService) {} // Injecting AuthService
+  constructor(private auth: AuthService, private config: ConfigService) {} // Injecting AuthService
 
   @Post('local/signup') // dto is Data Transfer Object
   @Public()
   @HttpCode(HttpStatus.CREATED)
   async signup(@Body() dto: SignupDto) {
-    const user = await this.auth.signup(dto);
+    const { user } = await this.auth.signup(dto);
 
     return { data: { user } };
   }
@@ -38,15 +39,18 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const user = await this.auth.login(dto, res);
+    const { user, tokens } = await this.auth.login(dto, res);
 
-    return { data: { user } };
+    return { data: { user, tokens } };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@AuthUserId() id: number) {
-    await this.auth.logout(id);
+  async logout(
+    @AuthUserId() id: number,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.auth.logout(id, res);
 
     return { data: { message: 'Successfully logout.' } };
   }
@@ -58,14 +62,19 @@ export class AuthController {
   async refreshTokens(
     @AuthUser('refreshToken') refreshToken: string,
     @AuthUserId() uid: number,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    const tokens = await this.auth.refreshTokens(res, uid, refreshToken);
+    const { user, tokens } = await this.auth.refreshTokens(
+      res,
+      uid,
+      refreshToken,
+    );
 
-    return { data: { tokens } };
+    return { data: { user, tokens } };
   }
 
   @Get('provider/google')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
@@ -73,9 +82,12 @@ export class AuthController {
   }
 
   @Get('provider/google/callback')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Req() req: AuthRequest, @Res() res: Response) {
-    return this.auth.googleAuth(req, res);
+    await this.auth.googleAuth(req, res);
+
+    return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
 }
