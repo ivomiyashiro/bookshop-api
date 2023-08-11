@@ -147,7 +147,7 @@ export class AuthService {
     }
 
     await this.updateRtHash(id, tokens.refresh_token);
-
+    console.log(tokens);
     this.saveTokensInCookies(res, tokens);
   }
 
