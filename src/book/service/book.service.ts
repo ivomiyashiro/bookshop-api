@@ -6,8 +6,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { CreateBookDto, UpdateBookDto } from '../dto';
+import { Book, Prisma } from '@prisma/client';
+import { BookDto, CreateBookDto, UpdateBookDto } from '../dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -120,31 +120,37 @@ export class BookService {
   }
 
   async createBook(dto: CreateBookDto) {
+    let books: Book[];
+    console.log(dto);
     try {
-      const book = await this.prismaService.book.create({
-        data: {
-          ...dto,
-          slug: this.slugfy(dto.title),
-          authors: {
-            connectOrCreate: dto.authors.map((author: string) => ({
-              where: { name: author },
-              create: { name: author },
-            })),
-          },
-          languages: {
-            connectOrCreate: dto.languages.map((language) => ({
-              where: { name: language },
-              create: { name: language },
-            })),
-          },
-        },
-        include: {
-          authors: true,
-          languages: true,
-        },
-      });
+      books = await Promise.all(
+        dto.books.map(async (dto: BookDto) => {
+          return await this.prismaService.book.create({
+            data: {
+              ...dto,
+              slug: this.slugfy(dto.title),
+              authors: {
+                connectOrCreate: dto.authors.map((author: string) => ({
+                  where: { name: author },
+                  create: { name: author },
+                })),
+              },
+              languages: {
+                connectOrCreate: dto.languages.map((language) => ({
+                  where: { name: language },
+                  create: { name: language },
+                })),
+              },
+            },
+            include: {
+              authors: true,
+              languages: true,
+            },
+          });
+        }),
+      );
 
-      return book;
+      return books;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
