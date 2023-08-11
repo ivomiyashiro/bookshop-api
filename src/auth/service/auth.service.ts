@@ -137,7 +137,7 @@ export class AuthService {
     };
   }
 
-  async googleAuth(req: AuthRequest, res: Response) {
+  async googleAuthCallback(req: AuthRequest, res: Response) {
     const { id, email, role } = req.user;
 
     const tokens = await this.getTokens(id, email, role);

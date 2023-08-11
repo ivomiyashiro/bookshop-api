@@ -86,8 +86,11 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req: AuthRequest, @Res() res: Response) {
-    await this.auth.googleAuth(req, res);
+  async googleAuthCallback(
+    @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.auth.googleAuthCallback(req, res);
 
     return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
