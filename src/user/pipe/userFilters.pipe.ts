@@ -9,7 +9,7 @@ import {
 @Injectable()
 export class UserFilterPipe implements PipeTransform {
   transform(value: any, _metadata: ArgumentMetadata) {
-    const { search, role, limit, offset, orderBy, sortBy } = value;
+    const { search, role, limit = 12, offset = 0, orderBy, sortBy } = value;
 
     const VALID_SORTBY = ['desc', 'asc', undefined];
     const VALID_ORDERBY = ['name', 'email', 'createdAt', undefined];
