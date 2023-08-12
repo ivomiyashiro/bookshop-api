@@ -64,7 +64,6 @@ export class AuthController {
     @AuthUserId() uid: number,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(refreshToken);
     const { user, tokens } = await this.auth.refreshTokens(
       res,
       uid,

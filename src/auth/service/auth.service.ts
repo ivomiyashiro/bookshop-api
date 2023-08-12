@@ -122,6 +122,7 @@ export class AuthService {
     }
 
     const rtMatches = await verify(user.refreshToken, rt);
+    console.log(rt, user);
     if (!rtMatches) throw new ForbiddenException('Access Denied.');
 
     const tokens = await this.getTokens(user.id, user.email, user.role);
@@ -139,16 +140,15 @@ export class AuthService {
 
   async googleAuthCallback(req: AuthRequest, res: Response) {
     const { id, email, role } = req.user;
-
+    console.log(id, email, role);
     const tokens = await this.getTokens(id, email, role);
-    console.log(tokens);
 
     if (!tokens) {
       return res.redirect(this.config.get('CLIENT_ORIGIN'));
     }
 
     await this.updateRtHash(id, tokens.refresh_token);
-    console.log('hola');
+
     this.saveTokensInCookies(res, tokens);
   }
 
