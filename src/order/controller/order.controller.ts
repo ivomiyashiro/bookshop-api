@@ -25,12 +25,20 @@ export class OrderController {
     @Query(OrderQueryValidation) params: any,
     @AuthUser() me: Omit<User, 'password'>,
   ) {
-    const { orders, count, totalCount } = await this.orderService.getMyOrders(
-      params,
-      me,
-    );
+    const { orders, page, totalCount, count, totalPages } =
+      await this.orderService.getMyOrders(params, me);
 
-    return { data: { orders, count, totalCount } };
+    return {
+      data: {
+        orders,
+        pagination: {
+          page,
+          totalPages,
+          count,
+          totalCount,
+        },
+      },
+    };
   }
 
   @Get('/storefront/orders/:id')
@@ -47,11 +55,20 @@ export class OrderController {
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   async getOrders(@Query(OrderQueryValidation) params: any) {
-    const { orders, count, totalCount } = await this.orderService.getOrders(
-      params,
-    );
+    const { orders, page, totalCount, count, totalPages } =
+      await this.orderService.getOrders(params);
 
-    return { data: { orders, count, totalCount } };
+    return {
+      data: {
+        orders,
+        pagination: {
+          page,
+          totalPages,
+          count,
+          totalCount,
+        },
+      },
+    };
   }
 
   @Put('/admin/orders/:id')

@@ -7,7 +7,7 @@ export class OrderService {
   constructor(private prismaService: PrismaService) {}
 
   async getMyOrders(params: any, user: Omit<User, 'password'>) {
-    const { limit, offset, orderBy, sortBy, where } = params;
+    const { page, limit, offset, orderBy, sortBy, where } = params;
 
     try {
       const ordersQuery = this.prismaService.order.findMany({
@@ -41,7 +41,13 @@ export class OrderService {
         totalCountQuery,
       ]);
 
-      return { orders, count: orders.length, totalCount };
+      return {
+        orders,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
+        count: orders.length,
+        totalCount,
+      };
     } catch (error) {
       throw new InternalServerErrorException('Internal server error.');
     }
@@ -60,7 +66,11 @@ export class OrderService {
               orderId: id,
             },
             include: {
-              book: true,
+              book: {
+                include: {
+                  authors: true,
+                },
+              },
             },
           },
         },
@@ -73,7 +83,7 @@ export class OrderService {
   }
 
   async getOrders(params: any) {
-    const { limit, offset, orderBy, sortBy, where } = params;
+    const { page = 1, limit, offset, orderBy, sortBy, where } = params;
 
     try {
       const ordersQuery = this.prismaService.order.findMany({
@@ -101,7 +111,13 @@ export class OrderService {
         totalCountQuery,
       ]);
 
-      return { orders, count: orders.length, totalCount };
+      return {
+        orders,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
+        count: orders.length,
+        totalCount,
+      };
     } catch (error) {
       throw new InternalServerErrorException('Internal server error.');
     }

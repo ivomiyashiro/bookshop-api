@@ -10,8 +10,8 @@ import {
 export class OrderQueryValidation implements PipeTransform {
   transform(value: any, _metadata: ArgumentMetadata) {
     const {
+      page = 1,
       limit = 12,
-      offset = 0,
       orderBy = 'createdAt',
       sortBy = 'asc',
       filters,
@@ -20,12 +20,12 @@ export class OrderQueryValidation implements PipeTransform {
     const VALID_SORTBY = ['desc', 'asc', undefined];
     const VALID_ORDERBY = ['totalPrice', 'createdAt', undefined];
 
-    if (isNaN(Number(limit))) {
-      throw new BadRequestException(`Limit ${limit} is not valid`);
+    if (isNaN(parseInt(page))) {
+      throw new BadRequestException(`Page ${page} is not valid`);
     }
 
-    if (isNaN(Number(offset))) {
-      throw new BadRequestException(`Offset ${offset} is not valid`);
+    if (isNaN(Number(limit))) {
+      throw new BadRequestException(`Limit ${limit} is not valid`);
     }
 
     if (!VALID_SORTBY.includes(sortBy)) {
@@ -68,8 +68,9 @@ export class OrderQueryValidation implements PipeTransform {
     }
 
     return {
+      page: parseInt(page),
       limit: parseInt(limit),
-      offset: parseInt(offset),
+      offset: (page - 1) * limit,
       orderBy,
       sortBy,
       where,
