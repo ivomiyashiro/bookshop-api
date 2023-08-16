@@ -122,7 +122,7 @@ export class AuthService {
     }
 
     const rtMatches = await verify(user.refreshToken, rt);
-    console.log(rt, user);
+
     if (!rtMatches) throw new ForbiddenException('Access Denied.');
 
     const tokens = await this.getTokens(user.id, user.email, user.role);
@@ -140,7 +140,7 @@ export class AuthService {
 
   async googleAuthCallback(req: AuthRequest, res: Response) {
     const { id, email, role } = req.user;
-    console.log(id, email, role);
+
     const tokens = await this.getTokens(id, email, role);
 
     if (!tokens) {
@@ -190,24 +190,26 @@ export class AuthService {
 
     res.cookie('ACCESS_TOKEN', access_token, {
       maxAge: 900000, // 15m
-      sameSite: 'lax',
+      sameSite: 'strict',
+      // httpOnly: true,
+      // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
     });
 
     res.cookie('REFRESH_TOKEN', refresh_token, {
       maxAge: 604800000, // 1w
-      sameSite: 'lax',
+      sameSite: 'strict',
+      // httpOnly: true,
+      // expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 1w
     });
   }
 
   removeTokensInCookies(res: Response) {
     res.cookie('ACCESS_TOKEN', '', {
       maxAge: 0,
-      sameSite: 'lax',
     });
 
     res.cookie('REFRESH_TOKEN', '', {
       maxAge: 0,
-      sameSite: 'lax',
     });
   }
 }

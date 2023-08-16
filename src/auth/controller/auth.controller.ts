@@ -29,7 +29,11 @@ export class AuthController {
   async signup(@Body() dto: SignupDto) {
     const { user } = await this.auth.signup(dto);
 
-    return { data: { user } };
+    return {
+      data: {
+        user,
+      },
+    };
   }
 
   @Post('local/login')
@@ -41,7 +45,12 @@ export class AuthController {
   ) {
     const { user, tokens } = await this.auth.login(dto, res);
 
-    return { data: { user, tokens } };
+    return {
+      data: {
+        user,
+        tokens,
+      },
+    };
   }
 
   @Post('logout')
@@ -52,7 +61,11 @@ export class AuthController {
   ) {
     await this.auth.logout(id, res);
 
-    return { data: { message: 'Successfully logout.' } };
+    return {
+      data: {
+        message: 'Successfully logout.',
+      },
+    };
   }
 
   @Post('refresh')
@@ -70,7 +83,12 @@ export class AuthController {
       refreshToken,
     );
 
-    return { data: { user, tokens } };
+    return {
+      data: {
+        user,
+        tokens,
+      },
+    };
   }
 
   @Get('provider/google')
@@ -89,8 +107,10 @@ export class AuthController {
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.auth.googleAuthCallback(req, res);
+    const { access_token }: any = await this.auth.googleAuthCallback(req, res);
 
-    return res.redirect(this.config.get('CLIENT_ORIGIN'));
+    return res.redirect(
+      this.config.get('CLIENT_ORIGIN') + `?at=${access_token}`,
+    );
   }
 }
