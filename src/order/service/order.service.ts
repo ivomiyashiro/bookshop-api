@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { OrderStatus, User } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class OrderService {
   constructor(private prismaService: PrismaService) {}
 
-  async getMyOrders(params: any, user: Omit<User, 'password'>) {
+  async getMyOrders(params: any, uid) {
     const { page, limit, offset, orderBy, sortBy, where } = params;
 
     try {
@@ -15,7 +15,7 @@ export class OrderService {
         take: limit,
         where: {
           ...where,
-          customerId: user.id,
+          customerId: uid,
         },
         orderBy: { [orderBy]: sortBy },
         include: {
@@ -32,7 +32,7 @@ export class OrderService {
       const totalCountQuery = this.prismaService.order.count({
         where: {
           ...where,
-          customerId: user.id,
+          customerId: uid,
         },
       });
 

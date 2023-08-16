@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { Role, User } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { OrderService } from '../service/order.service';
 import { OrderQueryValidation } from '../pipe';
 import { Roles } from 'src/user/decorator';
@@ -23,10 +23,10 @@ export class OrderController {
   @Get('/storefront/orders')
   async getMyOrders(
     @Query(OrderQueryValidation) params: any,
-    @AuthUser() me: Omit<User, 'password'>,
+    @AuthUser() me: any,
   ) {
     const { orders, page, totalCount, count, totalPages } =
-      await this.orderService.getMyOrders(params, me);
+      await this.orderService.getMyOrders(params, me.sub);
 
     return {
       data: {
@@ -44,9 +44,9 @@ export class OrderController {
   @Get('/storefront/orders/:id')
   async getMyOrder(
     @Param('id', new ParseIntPipe()) id: number,
-    @AuthUser() me: Omit<User, 'password'>,
+    @AuthUser() me: any,
   ) {
-    const order = await this.orderService.getMyOrder(id, me.id);
+    const order = await this.orderService.getMyOrder(id, me.sub);
 
     return { data: { order } };
   }
