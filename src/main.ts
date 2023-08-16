@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://nobugsbooks.vercel.app/'],
   });
   app.use(helmet());
   await app.listen(3030);
