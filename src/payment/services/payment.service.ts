@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentDto } from '../dto';
-import { preferences } from '../preferences';
 
 @Injectable()
 export class PaymentService {
@@ -26,7 +25,26 @@ export class PaymentService {
           },
           body: JSON.stringify({
             ...dto,
-            ...preferences,
+            back_urls: {
+              success:
+                this.configService.get('NODE_ENV') === 'development'
+                  ? this.configService.get('CLIENT_ORIGIN') + '/sucess'
+                  : this.configService.get('CLIENT_ORIGIN_PROD') + '/sucess',
+              failure:
+                this.configService.get('NODE_ENV') === 'development'
+                  ? this.configService.get('CLIENT_ORIGIN')
+                  : this.configService.get('CLIENT_ORIGIN_PROD'),
+              pending:
+                this.configService.get('NODE_ENV') === 'development'
+                  ? this.configService.get('CLIENT_ORIGIN')
+                  : this.configService.get('CLIENT_ORIGIN_PROD'),
+            },
+            notification_url:
+              'https://dev-bookstore.onrender.com/api/payments/notifications',
+            statement_descriptor: 'DEV BOOKSTORE',
+            payment_methods: {
+              installments: 1,
+            },
             metadata: {
               uid,
             },
