@@ -28,8 +28,8 @@ export class PaymentService {
             back_urls: {
               success:
                 this.configService.get('NODE_ENV') === 'development'
-                  ? this.configService.get('CLIENT_ORIGIN') + '/sucess'
-                  : this.configService.get('CLIENT_ORIGIN_PROD') + '/sucess',
+                  ? this.configService.get('CLIENT_ORIGIN') + '/success'
+                  : this.configService.get('CLIENT_ORIGIN_PROD') + '/success',
               failure:
                 this.configService.get('NODE_ENV') === 'development'
                   ? this.configService.get('CLIENT_ORIGIN')
