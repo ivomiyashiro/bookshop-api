@@ -149,6 +149,13 @@ export class AuthService {
 
     await this.updateRtHash(id, tokens.refresh_token);
 
+    res.cookie('test', 'hola', {
+      maxAge: 900000, // 15m
+      sameSite: 'strict',
+      // httpOnly: true,
+      // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
+    });
+
     this.saveTokensInCookies(res, tokens);
   }
 
