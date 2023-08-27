@@ -150,10 +150,10 @@ export class AuthService {
     await this.updateRtHash(id, tokens.refresh_token);
 
     res.cookie('test', 'hola', {
-      maxAge: 900000, // 15m
-      sameSite: 'strict',
+      sameSite: 'none',
       // httpOnly: true,
       // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
+      domain: '.nobugsbooks.vercel.app',
     });
 
     this.saveTokensInCookies(res, tokens);
