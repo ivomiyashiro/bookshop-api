@@ -9,12 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     credentials: true,
-    origin: [
-      '*',
-      // 'http://localhost:3000',
-      // 'https://nobugsbooks.vercel.app',
-      // 'https://dev-bookstore.onrender.com',
-    ],
+    origin: ['http://localhost:3000', 'https://nobugsbooks.vercel.app'],
   });
   app.set('trust proxy', 1);
   app.use(helmet());
