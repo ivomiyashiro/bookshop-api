@@ -150,10 +150,8 @@ export class AuthService {
     await this.updateRtHash(id, tokens.refresh_token);
 
     res.cookie('test', 'hola', {
-      sameSite: 'none',
       // httpOnly: true,
       // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
-      domain: '.nobugsbooks.vercel.app',
     });
 
     this.saveTokensInCookies(res, tokens);
@@ -197,14 +195,12 @@ export class AuthService {
 
     res.cookie('ACCESS_TOKEN', access_token, {
       maxAge: 900000, // 15m
-      sameSite: 'strict',
       // httpOnly: true,
       // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
     });
 
     res.cookie('REFRESH_TOKEN', refresh_token, {
       maxAge: 604800000, // 1w
-      sameSite: 'strict',
       // httpOnly: true,
       // expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 1w
     });
