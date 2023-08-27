@@ -107,10 +107,8 @@ export class AuthController {
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access_token }: any = await this.auth.googleAuthCallback(req, res);
+    await this.auth.googleAuthCallback(req, res);
 
-    return res.redirect(
-      this.config.get('CLIENT_ORIGIN') + `?at=${access_token}`,
-    );
+    return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
 }
