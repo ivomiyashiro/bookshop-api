@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Response } from 'express';
 import {
   BadRequestException,
   ConflictException,
@@ -49,7 +48,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto, res: Response) {
+  async login(dto: LoginDto) {
     const ERROR = 'Email or password incorrect.';
 
     try {
@@ -66,8 +65,6 @@ export class AuthService {
       const tokens = await this.getTokens(user.id, user.email, user.role);
       await this.updateRtHash(user.id, tokens.refresh_token);
 
-      this.saveTokensInCookies(res, tokens);
-
       const { password, refreshToken, createdAt, updatedAt, ...restOfUser } =
         user;
 
@@ -83,7 +80,7 @@ export class AuthService {
     }
   }
 
-  async logout(userId: number, res: Response): Promise<boolean> {
+  async logout(userId: number): Promise<boolean> {
     try {
       await this.prisma.user.updateMany({
         where: {
@@ -93,8 +90,6 @@ export class AuthService {
         data: { refreshToken: null },
       });
 
-      this.removeTokensInCookies(res);
-
       return true;
     } catch (error) {
       throw error;
@@ -102,7 +97,6 @@ export class AuthService {
   }
 
   async refreshTokens(
-    res: Response,
     userId: number,
     rt: string,
   ): Promise<{ user: Partial<User>; tokens: Tokens }> {
@@ -128,8 +122,6 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    this.saveTokensInCookies(res, tokens);
-
     const { refreshToken, ...restOfUser } = user;
 
     return {
@@ -138,23 +130,18 @@ export class AuthService {
     };
   }
 
-  async googleAuthCallback(req: AuthRequest, res: Response) {
+  async googleAuthCallback(req: AuthRequest) {
     const { id, email, role } = req.user;
 
     const tokens = await this.getTokens(id, email, role);
 
     if (!tokens) {
-      return res.redirect(this.config.get('CLIENT_ORIGIN'));
+      return null;
     }
 
     await this.updateRtHash(id, tokens.refresh_token);
 
-    res.cookie('test', 'hola', {
-      // httpOnly: true,
-      // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
-    });
-
-    this.saveTokensInCookies(res, tokens);
+    return tokens;
   }
 
   async updateRtHash(userId: number, rt: string): Promise<void> {
@@ -188,31 +175,5 @@ export class AuthService {
       access_token: accessToken,
       refresh_token: refreshToken,
     };
-  }
-
-  saveTokensInCookies(res: Response, tokens: Tokens) {
-    const { access_token, refresh_token } = tokens;
-
-    res.cookie('ACCESS_TOKEN', access_token, {
-      maxAge: 900000, // 15m
-      // httpOnly: true,
-      // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
-    });
-
-    res.cookie('REFRESH_TOKEN', refresh_token, {
-      maxAge: 604800000, // 1w
-      // httpOnly: true,
-      // expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 1w
-    });
-  }
-
-  removeTokensInCookies(res: Response) {
-    res.cookie('ACCESS_TOKEN', '', {
-      maxAge: 0,
-    });
-
-    res.cookie('REFRESH_TOKEN', '', {
-      maxAge: 0,
-    });
   }
 }

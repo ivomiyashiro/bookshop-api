@@ -39,11 +39,8 @@ export class AuthController {
   @Post('local/login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, tokens } = await this.auth.login(dto, res);
+  async login(@Body() dto: LoginDto) {
+    const { user, tokens } = await this.auth.login(dto);
 
     return {
       data: {
@@ -55,11 +52,8 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @AuthUserId() id: number,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    await this.auth.logout(id, res);
+  async logout(@AuthUserId() id: number) {
+    await this.auth.logout(id);
 
     return {
       data: {
@@ -75,13 +69,8 @@ export class AuthController {
   async refreshTokens(
     @AuthUser('refreshToken') refreshToken: string,
     @AuthUserId() uid: number,
-    @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, tokens } = await this.auth.refreshTokens(
-      res,
-      uid,
-      refreshToken,
-    );
+    const { user, tokens } = await this.auth.refreshTokens(uid, refreshToken);
 
     return {
       data: {
@@ -103,11 +92,14 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(
-    @Req() req: AuthRequest,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    await this.auth.googleAuthCallback(req, res);
+  async googleAuthCallback(@Req() req: AuthRequest, @Res() res: Response) {
+    const tokens = await this.auth.googleAuthCallback(req);
+
+    if (tokens) {
+      return res.redirect(
+        this.config.get('CLIENT_ORIGIN') + `?rt=${tokens.refresh_token}`,
+      );
+    }
 
     return res.redirect(this.config.get('CLIENT_ORIGIN'));
   }
