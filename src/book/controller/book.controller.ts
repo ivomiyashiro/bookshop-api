@@ -95,11 +95,20 @@ export class BookController {
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   async getAdminBooks(@Query(AdminQueryParamsPipe) query: any) {
-    const { books, count, totalCount } = await this.bookService.getAdminBooks(
-      query,
-    );
+    const { books, page, totalPages, count, totalCount } =
+      await this.bookService.getAdminBooks(query);
 
-    return { data: { books, count, totalCount } };
+    return {
+      data: {
+        books,
+        pagination: {
+          page,
+          totalPages,
+          count,
+          totalCount,
+        },
+      },
+    };
   }
 
   @Post('admin/books')

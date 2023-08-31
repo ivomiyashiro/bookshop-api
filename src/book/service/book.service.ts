@@ -166,8 +166,8 @@ export class BookService {
     }
   }
 
-  async getAdminBooks(query) {
-    const { limit, offset, orderBy, sortBy, where } = query;
+  async getAdminBooks(query: any) {
+    const { page, limit, offset, orderBy, sortBy, where } = query;
 
     try {
       const [books, totalCount] = await this.prismaService.$transaction([
@@ -177,13 +177,23 @@ export class BookService {
           where,
           orderBy: { [orderBy]: sortBy },
         }),
-        this.prismaService.book.count(),
+        this.prismaService.book.count({ where }),
       ]);
 
-      return { books, count: books.length, totalCount };
+      return {
+        books,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
+        count: books.length,
+        totalCount,
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientValidationError) {
         throw new BadRequestException([`Validation error`]);
+      }
+
+      if (error instanceof Prisma.PrismaClientInitializationError) {
+        throw new BadGatewayException([`Database connection error`]);
       }
 
       throw new InternalServerErrorException('Internal server error.');
